@@ -1,23 +1,48 @@
 import argparse
+from pathlib import Path
+from sys import stderr
 
-def cli():
+class CpError(Exception):
+    pass
+
+def copy_directory(src: Path, dest: Path):
+    print("cp directory")
+
+def copy_file(src: Path, dest: Path):
+    print("cp file")
+
+def copy(src: Path, dest: Path):
+    if src.is_file():
+        copy_file(src, dest)
+    elif src.is_dir():
+        copy_directory(src, dest)
+    else:
+        raise CpError("File type not supported.")
+
+def cli() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         prog="cp",
-        description="cp command implementation in Python",
+        description="cp command implementation in Python.",
     )
     parser.add_argument(
         "source",
-        help="Source directory or file"
+        type=Path,
+        help="Source directory or file."
     )
     parser.add_argument(
         "destination",
-        help="Destination directory or file"
+        type=Path,
+        help="Destination directory or file."
     )
     return parser.parse_args()
 
 def main():
     args = cli()
-    print(args)
-    
+    try:
+        copy(args.source, args.destination)
+    except CpError as e:
+        print(e, stderr)
+        exit(1)
+        
 if __name__ == "__main__":
     main()
